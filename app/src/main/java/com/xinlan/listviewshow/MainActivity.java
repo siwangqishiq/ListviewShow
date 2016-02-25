@@ -6,6 +6,8 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
+import android.view.Window;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AbsListView;
 import android.widget.BaseAdapter;
@@ -24,6 +26,10 @@ public class MainActivity extends AppCompatActivity {
 
     private View mInputLayout;
     private EditText mEditText;
+    private View mRootView;
+
+    private ViewTreeObserver.OnGlobalLayoutListener keyboardLayoutListener;
+    private boolean keyboardListenersAttached = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,7 +54,7 @@ public class MainActivity extends AppCompatActivity {
         mListView.setOnScrollListener(new AbsListView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(AbsListView view, int scrollState) {
-                if(mInputLayout.getVisibility()==View.VISIBLE){
+                if (mInputLayout.getVisibility() == View.VISIBLE) {
                     hideSoftKeyboard();
                     mInputLayout.setVisibility(View.GONE);
                 }//end if
@@ -59,6 +65,53 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
+
+        attachKeyboardListeners();
+    }
+
+    protected void attachKeyboardListeners() {
+        if (keyboardListenersAttached) {
+            return;
+        }
+
+        mRootView = (ViewGroup) findViewById(R.id.root_view);
+        keyboardLayoutListener = new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                int heightDiff = mRootView.getRootView().getHeight() - mRootView.getHeight();
+                //System.out.println("heightDiff ---> "+heightDiff);
+                int contentViewTop = getWindow().findViewById(Window.ID_ANDROID_CONTENT).getHeight();
+
+                if (heightDiff <= contentViewTop) {
+                    onHideKeyboard();
+                } else {
+                    int keyboardHeight = heightDiff - contentViewTop;
+                    onShowKeyboard(keyboardHeight);
+                }
+            }
+        };
+
+        mRootView.getViewTreeObserver().addOnGlobalLayoutListener(keyboardLayoutListener);
+
+        keyboardListenersAttached = true;
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        if (keyboardListenersAttached) {
+            mRootView.getViewTreeObserver().removeGlobalOnLayoutListener(keyboardLayoutListener);
+        }
+    }
+
+    private void onHideKeyboard(){
+        System.out.println("hide");
+    }
+    private int index = 0;
+    private void onShowKeyboard(int keyboardHeight){
+        System.out.println("show = "+keyboardHeight);
+        //mListView.setSelectionFromTop(index,0);
     }
 
     private final class ListAdapter extends BaseAdapter{
@@ -79,13 +132,13 @@ public class MainActivity extends AppCompatActivity {
         }
 
         @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
+        public View getView(final int position, View convertView, ViewGroup parent) {
             if(convertView == null){
                 convertView = mInfalter.inflate(R.layout.view_item,null);
 
                 ViewHolder holder = new ViewHolder();
                 holder.imageView = (ImageView)convertView.findViewById(R.id.image_view);
-                holder.contentView = (TextView)convertView.findViewById(R.id.content_view);
+                holder.contentView = (TextView) convertView.findViewById(R.id.content_view);
                 holder.commentView = (TextView)convertView.findViewById(R.id.comment_btn);
                 convertView.setTag(holder);
             }
@@ -103,6 +156,8 @@ public class MainActivity extends AppCompatActivity {
                     mEditText.setFocusableInTouchMode(true);
                     mEditText.requestFocus();
                     showSoftKeyboard();
+                    index = position;
+                    //mListView.setSe
                 }
             });
 
