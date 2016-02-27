@@ -10,6 +10,8 @@ public class Bean {
     private int pic;
     private List<Comment> commentList;
 
+    public int type = 1;
+
     public String getContent() {
         return content;
     }

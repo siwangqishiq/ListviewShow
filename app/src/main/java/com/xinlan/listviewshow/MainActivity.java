@@ -1,6 +1,9 @@
 package com.xinlan.listviewshow;
 
 import android.content.Context;
+import android.graphics.Rect;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -31,10 +34,16 @@ public class MainActivity extends AppCompatActivity {
     private ViewTreeObserver.OnGlobalLayoutListener keyboardLayoutListener;
     private boolean keyboardListenersAttached = false;
 
+    private Handler uiHandler = new Handler(Looper.getMainLooper());
+    int pos = 0;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        //getSupportActionBar().hide();
+
         initData();
 
         mInfalter = LayoutInflater.from(this);
@@ -46,6 +55,7 @@ public class MainActivity extends AppCompatActivity {
 
         ImageView headImage = new ImageView(this);
         headImage.setImageResource(R.drawable.xiaoze);
+        headImage.setScaleType(ImageView.ScaleType.FIT_XY);
 
         mAdapter = new ListAdapter();
         mListView.addHeaderView(headImage);
@@ -66,7 +76,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        attachKeyboardListeners();
+        //attachKeyboardListeners();
     }
 
     protected void attachKeyboardListeners() {
@@ -78,8 +88,15 @@ public class MainActivity extends AppCompatActivity {
         keyboardLayoutListener = new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
             public void onGlobalLayout() {
+                int[] inputLayoutLoc = new int[2];
+                mInputLayout.getLocationOnScreen(inputLayoutLoc);
+                System.out.println("actionBar height = "+getSupportActionBar().getHeight());
+                System.out.println("input init loc y = "+inputLayoutLoc[1]+"  userHeight = "+mRootView.getHeight()
+                        +"  rootHeight = "+mRootView.getRootView().getHeight());
+
+
                 int heightDiff = mRootView.getRootView().getHeight() - mRootView.getHeight();
-                //System.out.println("heightDiff ---> "+heightDiff);
+                System.out.println("heightDiff ---> "+heightDiff);
                 int contentViewTop = getWindow().findViewById(Window.ID_ANDROID_CONTENT).getHeight();
 
                 if (heightDiff <= contentViewTop) {
@@ -108,10 +125,12 @@ public class MainActivity extends AppCompatActivity {
     private void onHideKeyboard(){
         System.out.println("hide");
     }
-    private int index = 0;
+
     private void onShowKeyboard(int keyboardHeight){
-        System.out.println("show = "+keyboardHeight);
+        //System.out.println("show = " + keyboardHeight);
         //mListView.setSelectionFromTop(index,0);
+
+        //adjustListviewPosition(pos);
     }
 
     private final class ListAdapter extends BaseAdapter{
@@ -132,7 +151,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         @Override
-        public View getView(final int position, View convertView, ViewGroup parent) {
+        public View getView(final int position,View convertView, ViewGroup parent) {
             if(convertView == null){
                 convertView = mInfalter.inflate(R.layout.view_item,null);
 
@@ -140,14 +159,28 @@ public class MainActivity extends AppCompatActivity {
                 holder.imageView = (ImageView)convertView.findViewById(R.id.image_view);
                 holder.contentView = (TextView) convertView.findViewById(R.id.content_view);
                 holder.commentView = (TextView)convertView.findViewById(R.id.comment_btn);
+                holder.commentListView = (TextView)convertView.findViewById(R.id.comment_list_view);
+
+
                 convertView.setTag(holder);
             }
+
             ViewHolder holder = (ViewHolder)convertView.getTag();
+            holder.imageView.setVisibility(View.VISIBLE);
+            holder.commentListView.setVisibility(View.VISIBLE);
+
             final Bean data = (Bean)getItem(position);
             holder.imageView.setImageResource(data.getPic());
             holder.contentView.setText(data.getContent());
+
+            if(data.type == 0){
+                holder.imageView.setVisibility(View.GONE);
+                holder.commentListView.setVisibility(View.GONE);
+            }
+
             //holder.imageView.setVisibility(View.GONE);
             //handle comment click
+            final View view = convertView;
             holder.commentView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -156,8 +189,8 @@ public class MainActivity extends AppCompatActivity {
                     mEditText.setFocusableInTouchMode(true);
                     mEditText.requestFocus();
                     showSoftKeyboard();
-                    index = position;
-                    //mListView.setSe
+                    pos = position + 1;
+                    adjustListviewPosition(position + 1,view.getHeight());
                 }
             });
 
@@ -169,6 +202,32 @@ public class MainActivity extends AppCompatActivity {
         ImageView imageView;
         TextView contentView;
         TextView commentView;
+        TextView commentListView;
+    }
+
+    /**
+     * 调整Listiew item位置
+     * @param pos
+     */
+    private void adjustListviewPosition(final int pos,final int itemViewHeight){
+        uiHandler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                //System.out.println("adjust");
+                int[] inputLayoutLoc = new int[2];
+                mInputLayout.getLocationOnScreen(inputLayoutLoc);
+                System.out.println("input loc y = " + inputLayoutLoc[1]);
+
+                Rect rectangle= new Rect();
+                Window window= getWindow();
+                window.getDecorView().getWindowVisibleDisplayFrame(rectangle);
+                int statusBarHeight= rectangle.top;
+
+                int deltaY = inputLayoutLoc[1] -
+                        getSupportActionBar().getHeight() - statusBarHeight - itemViewHeight;
+                mListView.setSelectionFromTop(pos, deltaY);
+            }
+        },200);
     }
 
     private void showSoftKeyboard(){
@@ -200,17 +259,28 @@ public class MainActivity extends AppCompatActivity {
         bean4.setContent("小泽   我的世界  藤蓝滴滴答答滴滴答答的苍井武藤蓝滴滴答答滴滴答答的苍井空hahahhahahahs 哈哈哈哈 ");
         bean4.setPic(R.drawable.mo);
 
+        Bean bean5 = new Bean();
+        bean5.setContent("就一行字");
+        bean5.type = 0;
+
+        mList.add(bean1);
+        mList.add(bean2);
+        mList.add(bean3);
+        mList.add(bean4);
+        mList.add(bean5);
+        mList.add(bean5);
         mList.add(bean1);
         mList.add(bean2);
         mList.add(bean3);
         mList.add(bean4);
         mList.add(bean1);
+        mList.add(bean5);
         mList.add(bean2);
         mList.add(bean3);
+        mList.add(bean5);
+        mList.add(bean5);
+        mList.add(bean5);
         mList.add(bean4);
-        mList.add(bean1);
-        mList.add(bean2);
-        mList.add(bean3);
-        mList.add(bean4);
+        mList.add(bean5);
     }
 }//end class
