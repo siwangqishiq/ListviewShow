@@ -6,6 +6,8 @@ import android.os.Handler;
 import android.os.Looper;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.Layout;
+import android.text.StaticLayout;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -160,12 +162,12 @@ public class MainActivity extends AppCompatActivity {
                 holder.contentView = (TextView) convertView.findViewById(R.id.content_view);
                 holder.commentView = (TextView)convertView.findViewById(R.id.comment_btn);
                 holder.commentListView = (TextView)convertView.findViewById(R.id.comment_list_view);
-
+                holder.collapseBtn = (TextView)convertView.findViewById(R.id.collapse_btn);
 
                 convertView.setTag(holder);
             }
 
-            ViewHolder holder = (ViewHolder)convertView.getTag();
+            final ViewHolder holder = (ViewHolder)convertView.getTag();
             holder.imageView.setVisibility(View.VISIBLE);
             holder.commentListView.setVisibility(View.VISIBLE);
 
@@ -177,6 +179,53 @@ public class MainActivity extends AppCompatActivity {
                 holder.imageView.setVisibility(View.GONE);
                 holder.commentListView.setVisibility(View.GONE);
             }
+
+            //holder.contentView.getPaint()
+            //StaticLayout staticLayout = new StaticLayout()
+            int line = 1;
+            if(holder.contentView.getLineCount() == 0){
+                StaticLayout layout = new StaticLayout(data.getContent(),
+                        holder.contentView.getPaint(),mListView.getMeasuredWidth(), Layout.Alignment.ALIGN_NORMAL,
+                        1.0f, 0.0f, true);
+
+                //System.out.println(mListView.getMeasuredWidth()+" init   pos = "+position +
+                //        "  line = "+layout.getLineCount());
+                line = layout.getLineCount();
+            }else{
+                //System.out.println("pos = "+position +
+                //        "  line = "+holder.contentView.getLineCount());
+                line = holder.contentView.getLineCount();
+            }
+
+            if(line > 3){//大文本内容
+                holder.collapseBtn.setVisibility(View.VISIBLE);
+                if(data.expand){//展示展开状态
+                    holder.contentView.setMaxLines(Integer.MAX_VALUE);
+                    holder.collapseBtn.setText("点击收缩");
+                }else{//展示收缩状态
+                    holder.contentView.setMaxLines(3);
+                    holder.collapseBtn.setText("点击展开");
+                }//end if
+            }else{
+                holder.collapseBtn.setVisibility(View.GONE);
+            }
+
+
+            holder.collapseBtn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if(data.expand){//展开
+                        holder.contentView.setMaxLines(3);
+                        data.expand = false;
+                        holder.collapseBtn.setText("点击展开");
+                    }else{//收缩操作
+                        holder.contentView.setMaxLines(Integer.MAX_VALUE);
+                        data.expand = true;
+                        holder.collapseBtn.setText("点击收缩");
+                    }//end if
+                }
+            });
+
 
             //holder.imageView.setVisibility(View.GONE);
             //handle comment click
@@ -203,6 +252,7 @@ public class MainActivity extends AppCompatActivity {
         TextView contentView;
         TextView commentView;
         TextView commentListView;
+        TextView collapseBtn;
     }
 
     /**
@@ -242,45 +292,64 @@ public class MainActivity extends AppCompatActivity {
 
     private void initData(){
         mList = new ArrayList<Bean>();
-
+        String longStr = "tangAAAAAAAAAAAAAAAAAAAA<TextView\n" +
+                "        android:id=\"@+id/content_view\"\n" +
+                "        android:text=\"content 我是内容\"\n" +
+                "        android:textSize=\"18sp\"\n" +
+                "        android:layout_width=\"match_parent\"\n" +
+                "        android:layout_height=\"wrap_content\"\n" +
+                "        />";
         Bean bean1 = new Bean();
         bean1.setContent("苍井空hahahhahahahs 哈哈哈哈 ");
         bean1.setPic(R.drawable.hehe);
 
         Bean bean2 = new Bean();
-        bean2.setContent("武藤蓝滴滴答答滴滴答答的苍井空hahahhahahahs 哈哈哈哈 ");
+        bean2.setContent("武藤蓝滴滴答答滴滴答答的苍井空hahahhahahahs 哈哈哈哈 "+longStr);
         bean2.setPic(R.drawable.shufu1);
 
         Bean bean3 = new Bean();
-        bean3.setContent("小泽   答答滴滴答答的苍井武藤蓝滴滴答答滴滴答答的苍井武藤蓝滴滴答答滴滴答答的苍井武藤蓝滴滴答答滴滴答答的苍井空hahahhahahahs 哈哈哈哈 ");
+        bean3.setContent("小泽   答答滴滴答答的苍"+longStr+"井武藤蓝滴滴答答滴滴答答的苍井武藤蓝滴滴答答滴滴答答的苍井武藤蓝滴滴答答滴滴答答的苍井空hahahhahahahs 哈哈哈哈 ");
         bean3.setPic(R.drawable.shufu2);
 
         Bean bean4 = new Bean();
-        bean4.setContent("小泽   我的世界  藤蓝滴滴答答滴滴答答的苍井武藤蓝滴滴答答滴滴答答的苍井空hahahhahahahs 哈哈哈哈 ");
+        bean4.setContent("小泽   我的世界  藤蓝滴滴答答滴+"+longStr+"+滴答答的苍井武藤蓝滴滴答答滴滴答答的苍井空hahahhahahahs 哈哈哈哈 ");
         bean4.setPic(R.drawable.mo);
 
         Bean bean5 = new Bean();
         bean5.setContent("就一行字");
         bean5.type = 0;
 
+
+        Bean bean6 = new Bean();
+        bean6.setContent("苍井空hahahhahahahs 哈哈哈哈 ");
+        bean6.setPic(R.drawable.hehe);
+
+        Bean bean7 = new Bean();
+        bean7.setContent("武藤蓝滴滴答答滴滴答答的苍井空hahahhahahahs 哈哈哈哈 "+longStr);
+        bean7.setPic(R.drawable.shufu1);
+
+        Bean bean8 = new Bean();
+        bean8.setContent("小泽   答答滴滴答答的苍"+longStr+"井武藤蓝滴滴答答滴滴答答的苍井武藤蓝滴滴答答滴滴答答的苍井武藤蓝滴滴答答滴滴答答的苍井空hahahhahahahs 哈哈哈哈 ");
+        bean8.setPic(R.drawable.shufu2);
+
+        Bean bean9 = new Bean();
+        bean9.setContent("小泽   我的世界  藤蓝滴滴答答滴+"+longStr+"+滴答答的苍井武藤蓝滴滴答答滴滴答答的苍井空hahahhahahahs 哈哈哈哈 ");
+        bean9.setPic(R.drawable.mo);
+
+        Bean bean10 = new Bean();
+        bean10.setContent("就一行字");
+        bean10.type = 0;
+
         mList.add(bean1);
         mList.add(bean2);
         mList.add(bean3);
         mList.add(bean4);
         mList.add(bean5);
-        mList.add(bean5);
-        mList.add(bean1);
-        mList.add(bean2);
-        mList.add(bean3);
-        mList.add(bean4);
-        mList.add(bean1);
-        mList.add(bean5);
-        mList.add(bean2);
-        mList.add(bean3);
-        mList.add(bean5);
-        mList.add(bean5);
-        mList.add(bean5);
-        mList.add(bean4);
-        mList.add(bean5);
+        mList.add(bean6);
+        mList.add(bean7);
+        mList.add(bean8);
+        mList.add(bean9);
+        mList.add(bean10);
+
     }
 }//end class

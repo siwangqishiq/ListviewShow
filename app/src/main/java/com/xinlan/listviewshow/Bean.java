@@ -6,6 +6,7 @@ import java.util.List;
  * Created by panyi on 16/2/25.
  */
 public class Bean {
+    public boolean expand = false;
     private String content;
     private int pic;
     private List<Comment> commentList;
