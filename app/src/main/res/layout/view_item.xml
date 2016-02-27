@@ -53,13 +53,26 @@
             android:layout_height="wrap_content"/>
     </LinearLayout>
 
-    <TextView
-        android:id="@+id/comment_list_view"
-        android:textSize="12sp"
-        android:layout_width="match_parent"
+    <LinearLayout
+        android:id="@+id/comment_layout"
         android:layout_height="wrap_content"
-        android:text="评论1\n评论2\n评论3\n评论1\n评论2\n评论3\n评论1\n评论2\n评论3"
-        />
+        android:layout_width="match_parent"
+        android:orientation="horizontal">
+        <ImageView
+            android:src="@drawable/ic_launcher"
+            android:layout_height="20dp"
+            android:layout_width="20dp"/>
+        <com.xinlan.listviewshow.CommentView
+            android:layout_weight="1"
+            android:id="@+id/comment_list_view"
+            android:textSize="12sp"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="评论1\n评论2\n评论3\n评论1\n评论2\n评论3\n评论1\n评论2\n评论3"
+            />
+    </LinearLayout>
+
+
 
     <View
         android:layout_marginTop="5dp"

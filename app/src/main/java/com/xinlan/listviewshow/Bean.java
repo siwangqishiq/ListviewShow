@@ -1,5 +1,6 @@
 package com.xinlan.listviewshow;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -9,7 +10,7 @@ public class Bean {
     public boolean expand = false;
     private String content;
     private int pic;
-    private List<Comment> commentList;
+    private List<Comment> commentList = new ArrayList<Comment>();
 
     public int type = 1;
 

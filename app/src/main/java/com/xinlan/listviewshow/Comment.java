@@ -7,7 +7,7 @@ public class Comment {
     public String text;
     public String name;
     public Integer id;
-    public Integer replyId;
+    public int replyId;
     public String replyName;
     public String time;
 }//end class

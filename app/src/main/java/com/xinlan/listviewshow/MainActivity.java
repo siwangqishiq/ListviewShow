@@ -161,8 +161,9 @@ public class MainActivity extends AppCompatActivity {
                 holder.imageView = (ImageView)convertView.findViewById(R.id.image_view);
                 holder.contentView = (TextView) convertView.findViewById(R.id.content_view);
                 holder.commentView = (TextView)convertView.findViewById(R.id.comment_btn);
-                holder.commentListView = (TextView)convertView.findViewById(R.id.comment_list_view);
+                holder.commentListView = (CommentView)convertView.findViewById(R.id.comment_list_view);
                 holder.collapseBtn = (TextView)convertView.findViewById(R.id.collapse_btn);
+                holder.commentLayout = (ViewGroup)convertView.findViewById(R.id.comment_layout);
 
                 convertView.setTag(holder);
             }
@@ -243,6 +244,15 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
 
+            //评论处理
+            if(data.getCommentList().size() > 0){//有评论
+                holder.commentLayout.setVisibility(View.VISIBLE);
+
+                holder.commentListView.setList(data.getCommentList());
+            }else{//无评论
+                holder.commentLayout.setVisibility(View.GONE);
+            }//end if
+
             return convertView;
         }
     }//end inner class
@@ -251,8 +261,9 @@ public class MainActivity extends AppCompatActivity {
         ImageView imageView;
         TextView contentView;
         TextView commentView;
-        TextView commentListView;
+        CommentView commentListView;
         TextView collapseBtn;
+        ViewGroup commentLayout;
     }
 
     /**
@@ -351,5 +362,49 @@ public class MainActivity extends AppCompatActivity {
         mList.add(bean9);
         mList.add(bean10);
 
+        Comment comment2 = new Comment();
+        comment2.name="埃尔法";
+        comment2.text="做的不错 奥特曼 你是最强的哈哈哈哈哈哈";
+
+        Comment comment1 = new Comment();
+        comment1.name="奥特曼";
+        comment1.replyId=2;
+        comment1.replyName="埃尔法";
+        comment1.text="什么鸡巴玩意儿";
+
+        bean1.getCommentList().add(comment1);
+        bean1.getCommentList().add(comment1);
+        bean1.getCommentList().add(comment2);
+
+        bean4.getCommentList().add(comment1);
+        bean4.getCommentList().add(comment1);
+        bean4.getCommentList().add(comment2);
+        bean4.getCommentList().add(comment1);
+        bean4.getCommentList().add(comment1);
+        bean4.getCommentList().add(comment2);
+
+        bean6.getCommentList().add(comment1);
+        bean6.getCommentList().add(comment1);
+        bean6.getCommentList().add(comment1);
+        bean6.getCommentList().add(comment1);
+        bean6.getCommentList().add(comment1);
+        bean6.getCommentList().add(comment1);
+
+
+        for(int i = 0;i < 1000;i++) {
+            Bean addBean = new Bean();
+            addBean.setContent("小泽   我的世界  藤蓝滴滴答答滴+" + longStr + "+滴答答的苍井武藤蓝滴滴答答滴滴答答的苍井空hahahhahahahs 哈哈哈哈 ");
+            addBean.setPic(R.drawable.xiaoze);
+
+            for(int j = 0;j<100;j++){
+                Comment com = new Comment();
+                com.name="工藤新一";
+                com.replyId=0;
+                com.text="我来给你点个赞"+(j+1);
+                addBean.getCommentList().add(com);
+            }//end for j
+
+            mList.add(addBean);
+        }//end for i
     }
 }//end class
