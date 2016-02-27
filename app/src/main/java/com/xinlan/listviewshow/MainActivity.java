@@ -249,6 +249,18 @@ public class MainActivity extends AppCompatActivity {
                 holder.commentLayout.setVisibility(View.VISIBLE);
 
                 holder.commentListView.setList(data.getCommentList());
+
+                holder.commentListView.setCommentClick(new CommentView.ICommentClick() {
+                    @Override
+                    public void OnCommentItemClick(int position, Comment comment, int viewPos) {
+
+                    }
+
+                    @Override
+                    public void OnNameClick(int nameId, String name) {
+                        SubItemActivity.start(MainActivity.this,name);
+                    }
+                });
             }else{//无评论
                 holder.commentLayout.setVisibility(View.GONE);
             }//end if
@@ -396,7 +408,7 @@ public class MainActivity extends AppCompatActivity {
             addBean.setContent("小泽   我的世界  藤蓝滴滴答答滴+" + longStr + "+滴答答的苍井武藤蓝滴滴答答滴滴答答的苍井空hahahhahahahs 哈哈哈哈 ");
             addBean.setPic(R.drawable.xiaoze);
 
-            for(int j = 0;j<100;j++){
+            for(int j = 0;j<10;j++){
                 Comment com = new Comment();
                 com.name="工藤新一";
                 com.replyId=0;
